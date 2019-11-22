@@ -13,16 +13,19 @@ def ma_func(pd, n):
 
 if __name__ == '__main__':
     jq.auth("13811944446", "1qazxsw2")
-    print(jq.__version__)
+    print(jq.get_query_count())
     res_sts = []
-    stocks = jq.get_industry_stocks('801080')
-    # stocks = ['600000.XSHG', '000001.XSHE']
+    stock_SH = jq.get_index_stocks('000001.XSHG')
+    stock_SZ = jq.get_index_stocks('399001.XSHE')
+    stock_cy = jq.get_index_stocks('399006.XSHE')
+    stocks = stock_SZ + stock_cy
+    # print(len(stocks))
+    # stocks = ['300001.XSHE']
 
-    stocks.remove('688368.XSHG')
-    stocks.remove('688138.XSHG')
+    stocks.remove('300001.XSHE')
+    # stocks.remove('688138.XSHG')
 
-    now = dt.datetime.now()
-    today = now.strftime('%Y-%m-%d')
+    today = dt.date.today()
 
     panel = jq.get_price(stocks, count=100, end_date=today, frequency='daily', fields=['close', 'volume'])
     df_close = panel['close']
@@ -30,10 +33,12 @@ if __name__ == '__main__':
     for stock in stocks:
         dfc = df_close[stock]
         dfv = df_vol[stock]
-        # print(df)
+        print(stock)
+        ma5 = ma_func(dfc, 5)
         ma10 = ma_func(dfc, 10)
-        ma50 = ma_func(dfc, 50)
-        ma100 = ma_func(dfc, 100)
+        ma20 = ma_func(dfc, 20)
+        # ma50 = ma_func(dfc, 50)
+        # ma100 = ma_func(dfc, 100)
         min_c = dfc.min()
         max_c = dfc.max()
 
@@ -41,8 +46,15 @@ if __name__ == '__main__':
 
         close = dfc.tail(1).iat[0]
         vol = dfv.tail(1).iat[0]
+        # print(max_c)
+        # print(close)
+        # print(min_c)
+        # print("-------------")
 
-        if close > ma10 and close > ma50 and close > ma100 and ma10 > ma50 > ma100 and \
-                close > min_c * 1.3 and close > max_c * 0.9 and vol >= v_max:
+        if close > ma5 > ma10 > ma20 and \
+                max_c * 0.9 > close > min_c * 1.1 and vol >= v_max:
             res_sts.append(stock)
+            # print(close)
+            # print(max_c)
+            # print(stock)
     print(res_sts)
